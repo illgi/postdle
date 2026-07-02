@@ -1,0 +1,53 @@
+name: Build & Deploy postdle (ECR → ECS Fargate)
+
+# 모노레포 루트 Dockerfile 로 postdle 이미지 빌드 → ECR → ECS 강제 재배포.
+# 사전 1회(AWS):
+#  1) GitHub OIDC IdP + IAM 역할(신뢰 sub = repo:illgi/postdle:*) → ARN 을 secret AWS_ROLE_ARN
+#  2) ECR 레포 postdle
+#  3) ECS 클러스터/서비스 postdle + 태스크정의(컨테이너 포트 3000,
+#     env: PAGEDLE_API=https://api.pagedle.com/api/v1, NEXT_PUBLIC_ROOT_DOMAIN=postdle.com)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: postdle
+  ECS_CLUSTER: default
+  ECS_SERVICE: postdle
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image (monorepo root context)
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          IMAGE="$REGISTRY/${ECR_REPO}:${GITHUB_SHA::7}"
+          LATEST="$REGISTRY/${ECR_REPO}:latest"
+          docker build -f Dockerfile -t "$IMAGE" -t "$LATEST" .
+          docker push "$IMAGE"
+          docker push "$LATEST"
+
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --force-new-deployment --region "$AWS_REGION"
