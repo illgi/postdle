@@ -1,0 +1,45 @@
+{
+  "name": "@repo/post-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "pagedle·postdle 공유 글쓰기 에디터 (TipTap). 앱 내부 의존성 없이 props/어댑터로 분리.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./style.css": "./src/editor.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.13.0",
+    "@tiptap/pm": "^3.13.0",
+    "@tiptap/react": "^3.13.0",
+    "@tiptap/starter-kit": "^3.13.0",
+    "@tiptap/extension-color": "^3.13.0",
+    "@tiptap/extension-highlight": "^3.13.0",
+    "@tiptap/extension-image": "^3.13.0",
+    "@tiptap/extension-link": "^3.13.0",
+    "@tiptap/extension-list": "^3.14.0",
+    "@tiptap/extension-placeholder": "^3.13.0",
+    "@tiptap/extension-subscript": "^3.13.0",
+    "@tiptap/extension-superscript": "^3.13.0",
+    "@tiptap/extension-table": "^3.14.0",
+    "@tiptap/extension-text-align": "^3.13.0",
+    "@tiptap/extension-text-style": "^3.13.0",
+    "@tiptap/extension-underline": "^3.13.0",
+    "@tiptap/extension-youtube": "^3.13.0",
+    "tiptap-markdown": "^0.9.0",
+    "dompurify": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "typescript": "^5"
+  }
+}

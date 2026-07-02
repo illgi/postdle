@@ -1,0 +1,55 @@
+name: Build & Deploy (ECR → ECS Fargate)
+
+# main push → GitHub Actions가 이미지 빌드→ECR 푸시→ECS 강제 재배포.
+# 사전 1회 설정(브라우저로):
+#  1) GitHub OIDC IdP + IAM 역할(신뢰 sub = repo:illgi/postdle:*), 권한: ECR push,
+#     ecs:RegisterTaskDefinition/UpdateService, iam:PassRole → 역할 ARN을 시크릿 AWS_ROLE_ARN 에 저장
+#  2) ECR 레포 postdle
+#  3) ECS 클러스터/서비스 postdle + 태스크 정의(컨테이너 포트 3000,
+#     env: PAGEDLE_API=https://api.pagedle.com/api/v1, NEXT_PUBLIC_ROOT_DOMAIN=postdle.com)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: postdle
+  ECS_CLUSTER: default
+  ECS_SERVICE: postdle
+  ECS_CONTAINER: postdle
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          IMAGE="$REGISTRY/${ECR_REPO}:${GITHUB_SHA::7}"
+          LATEST="$REGISTRY/${ECR_REPO}:latest"
+          docker build -t "$IMAGE" -t "$LATEST" .
+          docker push "$IMAGE"
+          docker push "$LATEST"
+
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --force-new-deployment --region "$AWS_REGION"

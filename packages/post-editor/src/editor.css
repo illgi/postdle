@@ -1,0 +1,41 @@
+/* @repo/post-editor 기본 스타일 — 앱에서 import '@repo/post-editor/style.css' */
+.pe-root { border: 1px solid var(--pe-border, #e2e8f0); border-radius: 12px; background: #fff; overflow: hidden; }
+.pe-loading { min-height: 320px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fafafa; }
+
+.pe-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2px;
+  padding: 8px 10px; border-bottom: 1px solid var(--pe-border, #e2e8f0);
+  background: #f8fafc; position: sticky; top: 0; z-index: 5;
+}
+.pe-sep { width: 1px; height: 20px; background: #e2e8f0; margin: 0 6px; }
+
+.pe-btn {
+  min-width: 30px; height: 30px; padding: 0 7px; border: none; background: transparent;
+  border-radius: 7px; cursor: pointer; font-size: 14px; line-height: 1; color: #334155;
+  display: inline-flex; align-items: center; justify-content: center; font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.pe-btn:hover { background: #e8eefc; color: #0056b3; }
+.pe-btn.is-on { background: #dbe7ff; color: #0056b3; }
+
+.pe-content { padding: 18px 20px; min-height: 320px; }
+.pe-content .ProseMirror { outline: none; min-height: 300px; line-height: 1.8; font-size: 1rem; color: #1a1a2e; }
+.pe-content .ProseMirror:focus { outline: none; }
+.pe-content .ProseMirror > * + * { margin-top: 0.75em; }
+.pe-content .ProseMirror h1 { font-size: 1.7rem; font-weight: 700; }
+.pe-content .ProseMirror h2 { font-size: 1.4rem; font-weight: 700; }
+.pe-content .ProseMirror h3 { font-size: 1.15rem; font-weight: 700; }
+.pe-content .ProseMirror blockquote { border-left: 3px solid #cbd5e1; padding-left: 14px; color: #475569; }
+.pe-content .ProseMirror ul, .pe-content .ProseMirror ol { padding-left: 1.4em; }
+.pe-content .ProseMirror ul[data-type='taskList'] { list-style: none; padding-left: 0; }
+.pe-content .ProseMirror ul[data-type='taskList'] li { display: flex; gap: 8px; align-items: flex-start; }
+.pe-content .ProseMirror a { color: #2563eb; text-decoration: underline; }
+.pe-content .ProseMirror img { max-width: 100%; border-radius: 8px; }
+.pe-content .ProseMirror mark { background: #fef08a; border-radius: 3px; padding: 0 2px; }
+.pe-content .ProseMirror hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.2em 0; }
+.pe-content .ProseMirror table { border-collapse: collapse; width: 100%; }
+.pe-content .ProseMirror th, .pe-content .ProseMirror td { border: 1px solid #e2e8f0; padding: 6px 10px; }
+.pe-content .ProseMirror th { background: #f1f5f9; }
+.pe-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder); float: left; color: #a0aab5; pointer-events: none; height: 0;
+}

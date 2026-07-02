@@ -1,0 +1,26 @@
+{
+  "name": "postdle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "포스트들(Postdle) — pagedle 계정·DB 공유, postdle 카테고리 전용 글 발행 앱",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/post-editor": "workspace:*",
+    "next": "15.5.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.19",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "typescript": "^5.9.3"
+  }
+}

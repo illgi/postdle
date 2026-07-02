@@ -1,0 +1,12 @@
+{
+  "name": "miraepa-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "pagedle(pagesite) · postdle 통합 모노레포. 공유 post-editor 패키지로 글쓰기 에디터 일원화.",
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "dev:postdle": "pnpm --filter postdle dev"
+  }
+}

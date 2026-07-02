@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+*.md
+POSTDLE-PLAN.md
+SSO-DESIGN.md
+SESSION_NOTES.md
+pagedle.1.PNG
+.env
+.env*.local
+*.tsbuildinfo
+.DS_Store
