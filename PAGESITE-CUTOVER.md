@@ -1,55 +1,41 @@
-# 3단계 — pagesite 에디터 컷오버 (공유 에디터로 통일)
+# 3단계 — pagesite 에디터 공유 (Option B: submodule)
 
-pagesite(라이브)의 글쓰기 에디터를 `@repo/post-editor`로 교체해 **양방향 통일**을 완성한다.
-`MdEditor`는 pagesite 10곳+에서 쓰이고 프로덕션이라, **먼저 post 카테고리 작성기(PostEditor)만** 교체하고 검증 후 확대한다.
-이 샌드박스는 pagesite 전체 빌드를 검증할 수 없어, 아래 절차는 **Mac에서 실행·빌드·배포 검증**한다.
+**pagesite 저장소·배포는 그대로 두고**, 공유 에디터를 git submodule로 끌어다 쓴다.
+pagesite엔 이미 TipTap·DOMPurify가 설치돼 있어 **새 npm 의존성 불필요** — 에디터 "소스"만 참조.
+에디터를 모노레포에서 고치고 push → pagesite에서 `submodule update` 하면 반영 = 양방향 통일.
 
-## 왜 안전한가
-- 어댑터가 기존 `MdEditor`와 **동일한 default export + prop 시그니처**라 드롭인 교체.
-- 원본 `MdEditor.tsx`는 그대로 두고, **import 만 바꿔** 점진 적용(롤백=import 원복).
+> 라이브라 아래는 **Mac에서 실행 + 로컬 빌드/스테이징 검증 후 배포**. 원본 `MdEditor`는 그대로 두고 import만 바꿔 점진 적용(롤백=원복).
 
-## 절차
-
-### 1) pagesite를 모노레포로
-```bash
-mv ~/Downloads/work/pagedle/pagesite ~/Downloads/work/monorepo/apps/pagesite
+## 1) 공유 에디터를 submodule 로
+pagesite 저장소 루트에서:
 ```
-`monorepo/pnpm-workspace.yaml` 에 프론트/어드민 경로 추가:
-```yaml
-packages:
-  - "apps/*"
-  - "apps/pagesite/frontend"
-  - "apps/pagesite/admin"
-  - "packages/*"
+cd ~/Downloads/work/pagedle/pagesite
+git submodule add https://github.com/illgi/postdle.git frontend/shared-monorepo
+git commit -m "chore: add shared editor submodule (illgi/postdle)"
 ```
-`apps/pagesite/frontend/package.json` dependencies 에 추가:
+→ 에디터 소스 경로: `frontend/shared-monorepo/packages/post-editor/src/`
+
+## 2) 경로 별칭 (pagesite/frontend/tsconfig.json 의 paths 에 추가)
 ```json
-"@repo/post-editor": "workspace:*"
+"@shared-editor": ["./shared-monorepo/packages/post-editor/src/index.ts"],
+"@shared-editor/style.css": ["./shared-monorepo/packages/post-editor/src/editor.css"]
 ```
+(기존 `"@/*": ["./src/*"]` 옆에 추가. `baseUrl`은 기존 설정 그대로.)
 
-### 2) 어댑터 추가 — `apps/pagesite/frontend/src/components/editor/MdEditorShared.tsx`
+## 3) 어댑터 — `frontend/src/components/editor/MdEditorShared.tsx`
 ```tsx
 'use client';
-import { PostEditor } from '@repo/post-editor';
-import '@repo/post-editor/style.css';
+import { PostEditor } from '@shared-editor';
+import '@shared-editor/style.css';
 import { uploadFileApi } from '@/request/uploadApi';
-import { TPageContentType } from '@/types/commonCode';
 
 type Props = {
   value: string;
   setContent?: (v: string) => void;
   isEdit?: boolean;
   isDisable?: boolean;
-  // 기존 MdEditor의 나머지 props(pageId/postId/isPost/category/pageType…)는
-  // 공유 에디터에 불필요 → 받되 무시 (드롭인 호환)
-  isLightTool?: boolean;
-  pageId?: string;
-  pageType?: TPageContentType;
-  postId?: string;
-  postTitle?: string;
-  isPost?: boolean;
-  isFullWidth?: boolean;
-  category?: string;
+  // 기존 MdEditor 의 나머지 props 는 받되 무시 (드롭인 호환)
+  [k: string]: unknown;
 };
 
 export default function MdEditorShared({ value, setContent, isEdit = true, isDisable = false }: Props) {
@@ -65,30 +51,36 @@ export default function MdEditorShared({ value, setContent, isEdit = true, isDis
 }
 ```
 
-### 3) post 작성기만 교체 (targeted)
-`apps/pagesite/frontend/src/container/pageId/parts/PostEditor.tsx` 에서 import 만 교체:
+## 4) post 작성기만 교체 (targeted)
+`frontend/src/container/pageId/parts/PostEditor.tsx`:
 ```diff
 - import MdEditor from '@/components/editor/MdEditor';
 + import MdEditor from '@/components/editor/MdEditorShared';
 ```
-(다른 9곳은 그대로 → 영향 최소. 검증 후 순차 확대.)
+(나머지 9곳은 그대로 → 영향 최소. 검증 후 순차 확대.)
 
-### 4) 설치·빌드·검증
-```bash
-cd ~/Downloads/work/monorepo
-pnpm install
-pnpm --filter @pagesite/frontend build    # (프론트 package.json name 기준)
-pnpm --filter postdle build               # 회귀 없는지 함께
+## 5) 빌드·검증·배포
 ```
-로컬에서 글쓰기(툴바/이미지/저장/발행) 확인 → 스테이징/카나리 배포 → 프로덕션.
+cd ~/Downloads/work/pagedle/pagesite/frontend
+npm install        # 새 의존성 없음(제로일 수 있음). 확인용.
+npm run build      # 로컬 빌드 통과 확인
+```
+로컬에서 글쓰기(툴바/이미지/저장/발행) 확인 → 스테이징/카나리 → 프로덕션(기존 pagesite 파이프라인 그대로).
 
-### 5) 롤백
-import 를 `@/components/editor/MdEditor` 로 원복하면 즉시 기존 에디터로 복귀.
+## 6) 에디터 수정 반영 (양방향)
+- 모노레포에서 `packages/post-editor` 수정 → commit → `git push`(illgi/postdle)
+- pagesite에서:
+```
+cd ~/Downloads/work/pagedle/pagesite
+git submodule update --remote frontend/shared-monorepo
+git commit -am "chore: bump shared editor"
+```
+→ 다음 배포에 반영. (postdle은 워크스페이스라 자동 반영)
 
-## 확대(선택)
-검증되면 나머지 사용처(AddPage, PageBlocks, Series, Popup 등)도 순차로 `MdEditorShared` 로 교체.
-공유 에디터에 빠진 기능(폰트크기/색상 메뉴 등)이 필요하면 `@repo/post-editor` 툴바에 추가 → 양쪽 반영.
+## 7) 롤백
+import 를 `@/components/editor/MdEditor` 로 원복 → 즉시 기존 에디터.
 
 ## 주의
-- pagesite는 라이브. **반드시 로컬 빌드+스테이징 검증 후** 프로덕션 배포.
-- 공유 에디터는 HTML 저장(`getHTML`) — pagesite도 HTML 저장이라 호환. 상세/렌더는 기존 pagedle 방식(DOMPurify) 유지.
+- submodule 은 특정 커밋에 고정 → 의도적으로 `update --remote` 할 때만 바뀜(안정적).
+- 어댑터가 매핑 안 하는 pagedle 전용 기능(폰트크기/색상 메뉴 등)이 필요하면 `packages/post-editor` 툴바에 추가 → 양쪽 반영.
+- pagesite 는 라이브: **로컬 빌드 + 스테이징 검증 후** 프로덕션.
