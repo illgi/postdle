@@ -176,7 +176,7 @@ export async function pdCreatePost(
   input: { title: string; content: string; upperPageId?: string; type?: 'MARKDOWN' | 'HTML'; completeness?: number | string },
 ) {
   // pagedle 백엔드는 completeness 를 문자열('10'~'100')로 받는다. number 로 와도 문자열로 정규화.
-  const completeness = input.completeness != null ? String(input.completeness) : undefined;
+  const completeness = input.completeness != null ? Number(input.completeness) : undefined;
   const body = {
     content: input.content,
     type: input.type || 'MARKDOWN',
@@ -199,7 +199,7 @@ export async function pdUpdatePost(
   token: string,
   input: { id: string; title: string; content: string; type?: 'MARKDOWN' | 'HTML'; completeness?: number | string },
 ) {
-  const completeness = input.completeness != null ? String(input.completeness) : undefined;
+  const completeness = input.completeness != null ? Number(input.completeness) : undefined;
   const body = {
     content: input.content,
     type: input.type || 'MARKDOWN',
@@ -261,7 +261,8 @@ export async function pdDrafts(token: string): Promise<{ id: string; title: stri
 export async function pdMyPosts(memberName: string): Promise<SubPage[]> {
   const { res, j } = await req(`/pages/sub-pages?memberName=${encodeURIComponent(memberName)}`);
   if (!res.ok) return [];
-  return unwrapList<SubPage>(j).filter((p) => p.category === POSTDLE_CATEGORY);
+  // 발행된 postdle 글만 공개 (미발행/비공개 글은 목록·프로필·제목 URL에 노출 금지)
+  return unwrapList<SubPage>(j).filter((p) => p.category === POSTDLE_CATEGORY && p.published === true);
 }
 
 /** 글(페이지) 상세 */

@@ -74,6 +74,8 @@ export function renderMarkdown(src: string): string {
 /** 목록 미리보기용 순수 텍스트 (마크다운 기호 제거) */
 export function plainPreview(src: string, max = 120): string {
   const text = (src || '')
+    .replace(/<[^>]*>/g, ' ')      // HTML 태그 제거 (postdle 글은 HTML 저장)
+    .replace(/&[a-z#0-9]+;/gi, ' ') // HTML 엔티티 제거
     .replace(/[#>*`_\[\]()]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
