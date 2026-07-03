@@ -1,8 +1,23 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { pdMyPosts } from '@/lib/pagedle';
 import { postHref } from '@/lib/links';
+import { getCompletenessColor } from '@/lib/completeness';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ username: string }> },
+): Promise<Metadata> {
+  const { username } = await params;
+  const name = decodeURIComponent(username);
+  const desc = `${name}님이 Postdle에 발행한 글 모음.`;
+  return {
+    title: `${name} · Postdle`,
+    description: desc,
+    openGraph: { title: `${name} · Postdle`, description: desc, type: 'profile' },
+  };
+}
 
 export default async function Profile({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -20,17 +35,32 @@ export default async function Profile({ params }: { params: Promise<{ username: 
       </div>
 
       {posts.length === 0 ? (
-        <p className="muted" style={{ marginTop: 24 }}>아직 발행한 글이 없어요.</p>
+        <div className="profile-empty">
+          <div className="profile-empty-emoji" aria-hidden="true">✍️</div>
+          <div className="profile-empty-title">아직 발행한 글이 없어요</div>
+          <p className="profile-empty-sub">첫 글을 발행하면 여기에 모여요.</p>
+        </div>
       ) : (
         <div style={{ marginTop: 20 }}>
-          {posts.map((p) => (
-            <article key={p.id} className="post-item">
-              <h3 style={{ margin: 0 }}>
-                <Link href={postHref(name, p.pageName)}>{p.pageName || '(제목 없음)'}</Link>
-              </h3>
-              <div className="meta">{formatDate(p.createTime)} · 조회 {p.totalViewCount ?? 0}</div>
-            </article>
-          ))}
+          {posts.map((p) => {
+            const cmp = typeof p.completeness === 'number' ? p.completeness : null;
+            return (
+              <article key={p.id} className="post-item">
+                <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <Link href={postHref(name, p.pageName)}>{p.pageName || '(제목 없음)'}</Link>
+                  {cmp != null && (
+                    <span
+                      className="cmp-pill"
+                      style={{ color: getCompletenessColor(cmp), borderColor: getCompletenessColor(cmp) }}
+                    >
+                      완성도 {cmp}%
+                    </span>
+                  )}
+                </h3>
+                <div className="meta">{formatDate(p.createTime)} · 조회 {p.totalViewCount ?? 0}</div>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

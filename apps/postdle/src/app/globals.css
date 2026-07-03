@@ -391,3 +391,33 @@ a { color: inherit; text-decoration: none; }
 .draft-row:hover { border-color: var(--primary-2); background: #f5f9ff; }
 .draft-title { font-size: 0.92rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .draft-date { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+/* ===== 프로필: 완성도 배지 / 빈 상태 ===== */
+.cmp-pill {
+  display: inline-block; font-size: 0.68rem; font-weight: 700; line-height: 1.4;
+  padding: 1px 8px; border: 1px solid currentColor; border-radius: 20px; white-space: nowrap;
+}
+.profile-empty { text-align: center; padding: 48px 20px; color: var(--text-sub); }
+.profile-empty-emoji { font-size: 2rem; margin-bottom: 10px; }
+.profile-empty-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.profile-empty-sub { font-size: 0.9rem; color: var(--muted); margin: 6px 0 0; }
+
+/* ===== 검색 결과 페이지 ===== */
+.search-page-title { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.3px; margin: 0 0 4px; }
+.search-page-q { color: var(--primary-2); }
+.search-page-group { margin-top: 24px; }
+.search-page-group .search-label { font-size: 0.85rem; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; }
+.search-page-group .search-users { display: flex; flex-wrap: wrap; gap: 8px; }
+.search-page-post { display: flex; align-items: baseline; gap: 10px; padding: 12px 4px; border-bottom: 1px solid var(--border); }
+.search-page-post:hover .sp-title { color: var(--primary); }
+
+/* ===== 모바일 보강 ===== */
+@media (max-width: 560px) {
+  .feed-grid { grid-template-columns: 1fr; }
+  .completeness-row { flex-wrap: wrap; }
+  .cmp-track { max-width: 100%; flex-basis: 70%; }
+  .editor-meta { gap: 8px; }
+  .version-toggle { margin-left: 0; }
+  .draft-row { padding: 10px 12px; }
+  .search-page-title { font-size: 1.2rem; }
+}
