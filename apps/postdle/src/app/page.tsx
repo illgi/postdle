@@ -3,6 +3,8 @@ import { pdFeed } from '@/lib/pagedle';
 import { plainPreview } from '@/lib/markdown';
 import { EXAMPLE_POSTS, QUOTES, pickTodayQuote } from '@/lib/examples';
 import ReactionBar from '@/components/ReactionBar';
+import RecoCarousel from '@/components/RecoCarousel';
+import { postHref } from '@/lib/links';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,21 +52,19 @@ export default async function Home() {
 
       <section className="reco">
         <div className="reco-label">추천 문장</div>
-        <div className="reco-list">
-          {recommended.map((q) => (
-            <Link key={q.text} href={composeHref(q.text)} className="reco-item">
-              <span className="reco-text">{q.text}</span>
-              <span className="reco-source">{q.source}</span>
-            </Link>
-          ))}
-        </div>
+        <RecoCarousel
+          items={recommended.map((q) => ({ text: q.text, source: q.source, href: composeHref(q.text) }))}
+        />
       </section>
 
       <section className="feed-grid">
         {posts.map((item, i) => (
           <article key={item.page.id} className="post-card">
             {usingExamples && <span className="tag-example">예시</span>}
-            <Link href={`/p/${item.page.id}`} className="post-card-title">
+            <Link
+              href={usingExamples ? `/p/${item.page.id}` : postHref(item.memberName, item.page.pageName)}
+              className="post-card-title"
+            >
               {item.page.pageName || '(제목 없음)'}
             </Link>
             <div className="meta">

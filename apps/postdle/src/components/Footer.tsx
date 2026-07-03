@@ -16,7 +16,7 @@ export default function Footer() {
       <ul className="footer-info">
         <li>E-mail : {COMPANY.email}</li>
         <li>
-          운영사 {COMPANY.nameKr} ({COMPANY.name}) <span className="sep">·</span> 사업자등록번호{' '}
+          {COMPANY.nameKr} ({COMPANY.name}) <span className="sep">·</span> 사업자등록번호{' '}
           {COMPANY.businessNumber}
         </li>
         <li>

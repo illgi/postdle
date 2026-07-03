@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { pdMyPosts } from '@/lib/pagedle';
+import { postHref } from '@/lib/links';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           {posts.map((p) => (
             <article key={p.id} className="post-item">
               <h3 style={{ margin: 0 }}>
-                <Link href={`/p/${p.id}`}>{p.pageName || '(제목 없음)'}</Link>
+                <Link href={postHref(name, p.pageName)}>{p.pageName || '(제목 없음)'}</Link>
               </h3>
               <div className="meta">{formatDate(p.createTime)} · 조회 {p.totalViewCount ?? 0}</div>
             </article>

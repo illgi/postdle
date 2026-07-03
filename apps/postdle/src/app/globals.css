@@ -145,7 +145,7 @@ a { color: inherit; text-decoration: none; }
 .sp-author { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
 
 /* 오늘의 문장 */
-.today-quote { text-align: center; padding: 48px 20px 28px; }
+.today-quote { text-align: center; padding: 28px 20px 16px; }
 .tq-date { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.2px; }
 .tq-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; color: var(--primary-2); margin-bottom: 16px; }
 .tq-text { font-family: var(--font-voice, Georgia, 'Nanum Myeongjo', serif); font-size: 1.7rem; line-height: 1.5; color: var(--text); margin: 0 auto; max-width: 640px; font-weight: 500; letter-spacing: -0.3px; }
@@ -153,23 +153,45 @@ a { color: inherit; text-decoration: none; }
 .tq-source { margin-top: 14px; font-size: 0.9rem; color: var(--muted); }
 .tq-write { display: inline-block; margin-top: 18px; font-size: 0.9rem; color: var(--primary-2); font-weight: 600; }
 
-/* 추천 문장 */
-.reco { padding: 8px 0 4px; }
-.reco-label { font-size: 0.95rem; color: var(--text-sub); margin-bottom: 10px; }
-.reco-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-.reco-item { display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; transition: all 0.15s ease; }
+/* 추천 문장 — 가로 슬라이드 캐러셀 */
+.reco { padding: 4px 0; }
+.reco-label { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 8px; }
+.reco-carousel { position: relative; display: flex; align-items: stretch; }
+.reco-track {
+  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 2px;
+}
+.reco-track::-webkit-scrollbar { display: none; }
+.reco-item {
+  flex: 0 0 auto; width: 240px; scroll-snap-align: start;
+  display: flex; flex-direction: column; gap: 4px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; transition: all 0.15s ease;
+}
 .reco-item:hover { border-color: var(--primary-2); background: #f5f9ff; }
-.reco-text { font-size: 0.95rem; color: var(--text); line-height: 1.5; }
-.reco-source { font-size: 0.78rem; color: var(--muted); }
+.reco-text {
+  font-size: 0.92rem; color: var(--text); line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.reco-source { font-size: 0.76rem; color: var(--muted); }
+.reco-nav {
+  flex: 0 0 auto; align-self: center; width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid var(--border); background: #fff; color: var(--text-sub);
+  font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease; z-index: 1;
+}
+.reco-nav:hover { border-color: var(--primary-2); color: var(--primary-2); background: #f5f9ff; }
+.reco-nav.prev { margin-right: 6px; }
+.reco-nav.next { margin-left: 6px; }
+@media (max-width: 560px) { .reco-item { width: 200px; } .reco-nav { display: none; } }
 
 /* 전면 카드 그리드 */
 .feed-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px; padding: 8px 0 64px;
+  gap: 12px; padding: 12px 0 24px;
 }
 .post-card {
   position: relative; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 20px; display: flex; flex-direction: column;
+  border-radius: 14px; padding: 16px; display: flex; flex-direction: column;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .post-card:hover { box-shadow: 0 8px 24px rgba(37,99,235,0.08); transform: translateY(-2px); }
@@ -197,7 +219,7 @@ a { color: inherit; text-decoration: none; }
 /* 푸터 — pagedle Footer 시각 스타일 차용 (copyright 상단, 인라인 정보 목록) */
 .site-footer {
   color: var(--muted);
-  padding: 30px 20px;
+  padding: 18px 20px 20px;
   font-size: 14px;
   display: flex;
   flex-direction: column;

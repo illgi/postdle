@@ -7,6 +7,7 @@ import { PostEditor } from '@repo/post-editor';
 type Visibility = 'public' | 'private';
 
 const isEmptyHtml = (h: string) => !h || h.replace(/<[^>]*>/g, '').trim() === '';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'postdle.com';
 
 export default function ComposePage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function ComposePage() {
   const [visibility, setVisibility] = useState<Visibility>('public');
   const [msg, setMsg] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [username, setUsername] = useState<string | null>(null); // 서브도메인/주소 미리보기용
 
   // 랜딩의 문장/예시에서 넘어온 프리필 (?title=&content=, content 는 HTML)
   useEffect(() => {
@@ -23,6 +25,20 @@ export default function ComposePage() {
     const c = p.get('content');
     if (t) setTitle(t);
     if (c) setContent(c);
+  }, []);
+
+  // 로그인 유저명 조회 (주소 미리보기용)
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((j) => {
+        if (alive && j.ok && j.user) setUsername(j.user.displayName || j.user.username || null);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const onImageUpload = async (file: File): Promise<string> => {
@@ -73,6 +89,17 @@ export default function ComposePage() {
         <label htmlFor="title">제목</label>
         <input id="title" className="input" value={title} onChange={(e) => setTitle(e.target.value)}
           placeholder="제목을 입력하세요" />
+        <div className="muted" style={{ fontSize: '0.8rem', marginTop: 6 }}>
+          {title.trim() ? (
+            username ? (
+              <>주소: {username}.{ROOT_DOMAIN}/{title.trim()}</>
+            ) : (
+              <>주소: {ROOT_DOMAIN}/&lt;유저명&gt;/{title.trim()}</>
+            )
+          ) : (
+            <>제목을 입력하면 주소가 만들어져요.</>
+          )}
+        </div>
       </div>
       <div className="field">
         <label>내용</label>
