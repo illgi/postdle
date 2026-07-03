@@ -86,7 +86,6 @@ export type Quote = { text: string; source: string };
 export const QUOTES: Quote[] = [
   // ── 한국 근대문학 (원문·저작권 만료) ──
   { text: '죽는 날까지 하늘을 우러러 한 점 부끄럼이 없기를.', source: '윤동주 「서시」' },
-  { text: '나 보기가 역겨워 가실 때에는 말없이 고이 보내 드리오리다.', source: '김소월 「진달래꽃」' },
   { text: '박제가 되어버린 천재를 아시오?', source: '이상 「날개」' },
   { text: '님은 갔습니다. 아아, 사랑하는 나의 님은 갔습니다.', source: '한용운 「님의 침묵」' },
   { text: '내 고장 칠월은 청포도가 익어 가는 시절.', source: '이육사 「청포도」' },

@@ -26,7 +26,7 @@ export default async function Home() {
   const recommended = [...QUOTES]
     .filter((q) => q.text !== today.text)
     .sort(() => Math.random() - 0.5)
-    .slice(0, 6);
+    .slice(0, 12);
   // 에디터가 HTML 저장이라 인용문을 blockquote HTML 로 프리필
   const composeHref = (text: string) => `/compose?content=${encodeURIComponent(`<blockquote><p>${text}</p></blockquote><p></p>`)}`;
 
