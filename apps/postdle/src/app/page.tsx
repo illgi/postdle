@@ -1,25 +1,15 @@
 import Link from 'next/link';
 import { pdFeed } from '@/lib/pagedle';
 import { plainPreview } from '@/lib/markdown';
-import { EXAMPLE_POSTS, QUOTES, pickTodayQuote } from '@/lib/examples';
+import { QUOTES, pickTodayQuote } from '@/lib/examples';
 import ReactionBar from '@/components/ReactionBar';
 import RecoCarousel from '@/components/RecoCarousel';
 import { postHref } from '@/lib/links';
 
 export const dynamic = 'force-dynamic';
 
-// 예시 글용 시드 반응 수 (콜드스타트 방지)
-const SEED = [
-  { heartCount: 12, thumbsUpCount: 5, sosoCount: 1 },
-  { heartCount: 8, thumbsUpCount: 9, sosoCount: 0 },
-  { heartCount: 15, thumbsUpCount: 3, sosoCount: 2 },
-  { heartCount: 6, thumbsUpCount: 4, sosoCount: 1 },
-];
-
 export default async function Home() {
-  const feed = await pdFeed(0, 20);
-  const usingExamples = feed.length === 0;
-  const posts = usingExamples ? EXAMPLE_POSTS : feed;
+  const posts = await pdFeed(0, 20);
 
   // 한국 시간(KST) 기준 오늘 날짜/요일
   const kst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
@@ -57,33 +47,23 @@ export default async function Home() {
         />
       </section>
 
-      <section className="feed-grid">
-        {posts.map((item, i) => (
-          <article key={item.page.id} className="post-card">
-            {usingExamples && <span className="tag-example">예시</span>}
-            <Link
-              href={usingExamples ? `/p/${item.page.id}` : postHref(item.memberName, item.page.pageName)}
-              className="post-card-title"
-            >
-              {item.page.pageName || '(제목 없음)'}
-            </Link>
-            <div className="meta">
-              {usingExamples ? (
-                item.memberName
-              ) : (
+      {posts.length > 0 && (
+        <section className="feed-grid">
+          {posts.map((item) => (
+            <article key={item.page.id} className="post-card">
+              <Link href={postHref(item.memberName, item.page.pageName)} className="post-card-title">
+                {item.page.pageName || '(제목 없음)'}
+              </Link>
+              <div className="meta">
                 <Link href={`/u/${encodeURIComponent(item.memberName)}`} className="author-link">{item.memberName}</Link>
-              )}
-              {' · '}{formatDate(item.page.createTime)}
-            </div>
-            <p className="post-card-preview">{plainPreview(item.page.content, 100)}</p>
-            <ReactionBar
-              postId={item.page.id}
-              demo={usingExamples}
-              initial={usingExamples ? SEED[i % SEED.length] : undefined}
-            />
-          </article>
-        ))}
-      </section>
+                {' · '}{formatDate(item.page.createTime)}
+              </div>
+              <p className="post-card-preview">{plainPreview(item.page.content, 100)}</p>
+              <ReactionBar postId={item.page.id} />
+            </article>
+          ))}
+        </section>
+      )}
     </div>
   );
 }
