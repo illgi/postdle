@@ -4,10 +4,11 @@
 
 ---
 
-## 0. 한 줄 요약
+## 0. 한 줄 요약 (2026-07-03 갱신)
 - **postdle**: pagedle 계정·DB 공유, `category='postdle'` 글 발행 독립 앱. **완성·빌드 검증됨.**
-- **에디터 통일**: 모노레포 + 공유 `@repo/post-editor`(TipTap 리치 에디터) 만들고 **postdle이 사용 중(빌드 통과)**. pagesite 컷오버만 남음.
-- **미배포**: postdle GitHub 푸시·AWS·DNS는 아직. pagesite 백엔드 필터는 커밋됐으나 main 반영·배포 필요.
+- **배포 완료**: AWS dec 계정 App Runner 서비스 `postdle` 라이브(URL `x6j3r3dhpq.us-east-1.awsapprunner.com`, HTTPS 200). Cloudflare(gouvision 도메인)에서 postdle.com/www CNAME(DNS only) + ACM 검증 CNAME 3개 완료 → 커스텀 도메인 인증서 활성, **https://postdle.com 접속 가능.**
+- **에디터 통일 미완**: postdle은 공유 `@repo/post-editor`(우리 재현 TipTap) 사용. **그러나 pagedle.com 실제 에디터(MdEditor)와 외형·기능이 "완전히 다름" → 진짜 통일 필요.** pagesite 컷오버(Option B)도 미적용.
+- **배포 파이프라인**: GitHub Actions `deploy-ecs.yml` OIDC→ECR 빌드·푸시 성공. 불필요한 ECS 단계 제거함(App Runner AutoDeploy). 이 변경 + `deploy/` 스크립트는 아직 커밋 안 됨.
 
 ---
 

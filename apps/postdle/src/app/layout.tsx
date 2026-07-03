@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { BRAND } from '@/lib/config';
 import SearchBox from '@/components/SearchBox';
 import AuthNav from '@/components/AuthNav';
+import Footer from '@/components/Footer';
 import '@repo/post-editor/style.css';
 import './globals.css';
 
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

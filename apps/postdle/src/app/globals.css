@@ -193,3 +193,46 @@ a { color: inherit; text-decoration: none; }
 .reaction-btn .rcount { font-variant-numeric: tabular-nums; min-width: 8px; }
 .reaction-btn .rlabel { }
 @media (max-width: 380px) { .reaction-btn .rlabel { display: none; } }
+
+/* 푸터 — pagedle Footer 시각 스타일 차용 (copyright 상단, 인라인 정보 목록) */
+.site-footer {
+  color: var(--muted);
+  padding: 30px 20px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+}
+.site-footer .footer-copyright { flex: none; }
+.site-footer .footer-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.site-footer .footer-info li {
+  font-size: 12px;
+  color: var(--muted);
+  list-style: none;
+}
+.site-footer .footer-info li .sep { font-size: 10px; }
+.site-footer .footer-info a { color: var(--muted); }
+.site-footer .footer-info a:hover { text-decoration: underline; color: var(--text-sub); }
+@media (max-width: 560px) {
+  .site-footer { font-size: 12px; padding: 30px 16px; gap: 8px; }
+  .site-footer .footer-info li { font-size: 10px; }
+  .site-footer .footer-info li .sep { font-size: 8px; }
+}
+
+/* 약관 / 개인정보 문서 페이지 */
+.legal { max-width: 720px; margin: 0 auto; padding: 40px 20px 64px; }
+.legal .legal-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.3px; margin: 0 0 8px; }
+.legal .legal-sub { font-size: 0.95rem; color: var(--text-sub); font-weight: 600; margin: 0 0 24px; }
+.legal .legal-body { font-size: 0.95rem; line-height: 1.8; color: var(--text-sub); white-space: pre-wrap; }
+.legal .legal-body strong { color: var(--text); font-weight: 700; }
+.legal .legal-home { display: inline-block; margin-top: 8px; font-size: 0.9rem; color: var(--primary-2); font-weight: 600; }
