@@ -261,21 +261,27 @@ export async function pdSearchPostdle(keyword: string): Promise<SearchResult> {
 
 /**
  * 공개 피드 — postdle 카테고리 글 목록.
- * pagedle 백엔드 /pages/upload-user-list?category=postdle (category 파라미터는 백엔드에 추가됨).
+ * pagedle 백엔드 /pages/upload-user-list?category=postdle 로 요청하되,
+ * 프로덕션 백엔드가 아직 category 파라미터를 무시할 수 있으므로(공유 DB에 여러 category 혼재)
+ * 받은 결과를 postdle 카테고리로 한 번 더 필터한다. → 백엔드 배포와 무관하게 postdle 글만 노출.
  */
 export async function pdFeed(page = 0, size = 20): Promise<FeedItem[]> {
   try {
-    const { res, j } = await req(`/pages/upload-user-list?category=${POSTDLE_CATEGORY}&page=${page}&size=${size}`);
+    // 백엔드 필터가 무시될 수 있어, 넉넉히 받아 클라이언트에서 category 필터 후 size 만큼 사용.
+    const fetchSize = Math.max(size * 4, 40);
+    const { res, j } = await req(`/pages/upload-user-list?category=${POSTDLE_CATEGORY}&page=${page}&size=${fetchSize}`);
     if (!res.ok) return [];
     // PageImpl 응답: result.content = [{ page, memberName }]
     const row = (j && j.result) || {};
     const content = Array.isArray(row) ? row : row.content;
     const list = Array.isArray(content) ? content : [];
-    // 형태가 어긋난 항목은 걸러 렌더 오류(500) 방지 → 없으면 예시로 폴백
-    return list.filter((it: unknown): it is FeedItem => {
-      const p = (it as FeedItem | undefined)?.page;
-      return !!p && typeof p.id === 'string';
-    });
+    return list
+      // 형태가 어긋난 항목 제거(렌더 오류 방지) + postdle 카테고리만
+      .filter((it: unknown): it is FeedItem => {
+        const p = (it as FeedItem | undefined)?.page;
+        return !!p && typeof p.id === 'string' && p.category === POSTDLE_CATEGORY;
+      })
+      .slice(0, size);
   } catch {
     return [];
   }
