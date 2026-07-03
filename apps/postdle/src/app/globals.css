@@ -300,3 +300,94 @@ a { color: inherit; text-decoration: none; }
 .legal .legal-body { font-size: 0.95rem; line-height: 1.8; color: var(--text-sub); white-space: pre-wrap; }
 .legal .legal-body strong { color: var(--text); font-weight: 700; }
 .legal .legal-home { display: inline-block; margin-top: 8px; font-size: 0.9rem; color: var(--primary-2); font-weight: 600; }
+
+/* ===== 글쓰기: 완성도 슬라이더 ===== */
+.completeness-row { display: flex; align-items: center; gap: 12px; }
+.cmp-track {
+  position: relative; flex: 1; height: 24px; display: flex; align-items: center;
+  cursor: pointer; touch-action: none; user-select: none; max-width: 560px;
+}
+.cmp-track:focus-visible { outline: 2px solid var(--primary-2); outline-offset: 4px; border-radius: 4px; }
+.cmp-bg { position: absolute; left: 0; right: 0; height: 6px; background: #e8e8e8; border-radius: 3px; }
+.cmp-fill { position: absolute; left: 0; height: 6px; border-radius: 3px; transition: width 0.1s ease; }
+.cmp-ticks { position: absolute; left: 0; right: 0; height: 6px; display: flex; align-items: center; pointer-events: none; }
+.cmp-tick { position: absolute; width: 1px; height: 10px; background: rgba(0,0,0,0.12); }
+.cmp-thumb {
+  position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--primary-2);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15); transform: translateX(-50%);
+  transition: box-shadow 0.15s ease; z-index: 2;
+}
+.cmp-thumb:hover, .cmp-thumb.active { box-shadow: 0 0 0 6px rgba(37,99,235,0.12), 0 1px 4px rgba(0,0,0,0.15); }
+.cmp-pct { font-size: 0.82rem; font-weight: 700; min-width: 38px; text-align: right; white-space: nowrap; }
+
+/* ===== 글쓰기: 에디터 하단 메타(임시저장/자동저장/버전) ===== */
+.editor-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.draft-save-btn {
+  font-size: 0.8rem; font-weight: 600; padding: 5px 14px; border-radius: 6px;
+  background: #fff; border: 1px solid var(--border); color: var(--text-sub);
+  cursor: pointer; font-family: inherit; transition: all 0.15s ease;
+}
+.draft-save-btn:hover { border-color: var(--primary-2); color: var(--primary-2); background: #f5f9ff; }
+.draft-flash { font-size: 0.78rem; font-weight: 600; color: #0f9d6b; }
+.auto-saved { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.version-toggle {
+  margin-left: auto; font-size: 0.8rem; padding: 5px 10px; border-radius: 6px;
+  background: transparent; border: none; color: var(--text-sub);
+  cursor: pointer; font-family: inherit; transition: color 0.15s ease;
+}
+.version-toggle:hover { color: var(--primary-2); }
+
+/* ===== 글쓰기: 버전 기록 패널 ===== */
+.version-panel {
+  margin-top: 8px; border: 1px solid var(--border); border-radius: 8px;
+  background: #fafafa; max-height: 220px; overflow-y: auto;
+}
+.version-empty { text-align: center; padding: 18px; color: var(--muted); font-size: 0.85rem; }
+.version-item {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border: none; border-bottom: 1px solid #eee;
+  background: transparent; cursor: pointer; font-family: inherit; text-align: left;
+  transition: background 0.1s ease;
+}
+.version-item:last-child { border-bottom: none; }
+.version-item:hover { background: #f1f5f9; }
+.version-time { font-size: 0.8rem; color: var(--text); white-space: nowrap; }
+.version-vtitle { font-size: 0.78rem; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.version-cmp { font-size: 0.72rem; font-weight: 700; margin-left: auto; white-space: nowrap; }
+
+/* ===== 글쓰기: 이어쓰기 칩 ===== */
+.restore-chip {
+  display: flex; align-items: center; gap: 10px; margin: 12px 0 4px;
+  padding: 8px 12px; border: 1px solid var(--primary-2); border-radius: 10px;
+  background: #eef4ff; font-size: 0.85rem; color: var(--text-sub);
+}
+.restore-chip > button {
+  font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 6px;
+  background: var(--primary-2); border: none; color: #fff; cursor: pointer; font-family: inherit;
+}
+.restore-chip .restore-dismiss {
+  margin-left: auto; background: transparent; color: var(--muted);
+  border: none; cursor: pointer; font-size: 0.9rem; padding: 2px 6px;
+}
+
+/* ===== 글쓰기: 내 임시저장(서버) 목록 ===== */
+.drafts-section { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); }
+.drafts-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.drafts-head h3 { font-size: 1rem; font-weight: 700; margin: 0; }
+.drafts-refresh {
+  font-size: 0.78rem; padding: 4px 10px; border-radius: 6px;
+  background: #fff; border: 1px solid var(--border); color: var(--text-sub);
+  cursor: pointer; font-family: inherit;
+}
+.drafts-refresh:hover:not(:disabled) { border-color: var(--primary-2); color: var(--primary-2); }
+.drafts-refresh:disabled { opacity: 0.6; cursor: default; }
+.drafts-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.draft-row {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
+  background: #fff; cursor: pointer; font-family: inherit; text-align: left; transition: all 0.15s ease;
+}
+.draft-row:hover { border-color: var(--primary-2); background: #f5f9ff; }
+.draft-title { font-size: 0.92rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.draft-date { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }

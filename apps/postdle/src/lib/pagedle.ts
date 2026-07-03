@@ -17,6 +17,8 @@ export type Page = {
   memberId: string;
   createTime: string;
   updateTime: string;
+  published?: boolean;
+  completeness?: number | string;
 };
 
 export type SubPage = {
@@ -171,20 +173,44 @@ export async function pdPublish(token: string, pageId: string): Promise<void> {
 /** postdle 글 작성. 메인 페이지 아래 하위 페이지로 생성한다. */
 export async function pdCreatePost(
   token: string,
-  input: { title: string; content: string; upperPageId?: string; type?: 'MARKDOWN' | 'HTML'; completeness?: number },
+  input: { title: string; content: string; upperPageId?: string; type?: 'MARKDOWN' | 'HTML'; completeness?: number | string },
 ) {
+  // pagedle 백엔드는 completeness 를 문자열('10'~'100')로 받는다. number 로 와도 문자열로 정규화.
+  const completeness = input.completeness != null ? String(input.completeness) : undefined;
   const body = {
     content: input.content,
     type: input.type || 'MARKDOWN',
     pageName: input.title,
     ...(input.upperPageId ? { upperPageId: input.upperPageId } : {}),
     category: POSTDLE_CATEGORY,
-    ...(input.completeness != null ? { completeness: input.completeness } : {}),
+    ...(completeness != null ? { completeness } : {}),
   };
   const { res, j } = await req('/pages', { method: 'POST', token, body: JSON.stringify(body) });
   const row = unwrap<Page>(j);
   if (!res.ok || !row) throw new HttpError((j && j.message) || '글 저장에 실패했어요');
   return row;
+}
+
+/**
+ * 기존 글 수정 (pagedle useUpdatePageMutation 과 동일한 PUT /pages/{id}).
+ * upperPageId/folderId 는 보내지 않아 서버가 기존 부모를 유지한다.
+ */
+export async function pdUpdatePost(
+  token: string,
+  input: { id: string; title: string; content: string; type?: 'MARKDOWN' | 'HTML'; completeness?: number | string },
+) {
+  const completeness = input.completeness != null ? String(input.completeness) : undefined;
+  const body = {
+    content: input.content,
+    type: input.type || 'MARKDOWN',
+    pageName: input.title,
+    category: POSTDLE_CATEGORY,
+    ...(completeness != null ? { completeness } : {}),
+  };
+  const { res, j } = await req(`/pages/${encodeURIComponent(input.id)}`, { method: 'PUT', token, body: JSON.stringify(body) });
+  const row = unwrap<Page>(j);
+  if (!res.ok) throw new HttpError((j && j.message) || '글 수정에 실패했어요');
+  return row ?? { id: input.id };
 }
 
 /** 회원의 전체 피드 노출 설정 켜기 (공개 글이 랜딩 피드에 뜨도록). null-guard 라 계정정보 안전. */
@@ -204,7 +230,7 @@ export async function pdEnableFeedDisplay(token: string): Promise<void> {
  */
 export async function pdWritePost(
   token: string,
-  input: { title: string; content: string; type?: 'MARKDOWN' | 'HTML' },
+  input: { title: string; content: string; type?: 'MARKDOWN' | 'HTML'; completeness?: number | string },
   isPublic: boolean,
 ): Promise<Page> {
   const upperPageId = await pdEnsureMainPage(token);
@@ -214,6 +240,21 @@ export async function pdWritePost(
     await pdEnableFeedDisplay(token);
   }
   return page;
+}
+
+/**
+ * 내 임시저장(미발행) 글 목록.
+ * pdMyList(token) 에서 category='postdle' && published !== true 이며,
+ * 실제 제목이 있는 하위 페이지만(최상위 'home' 메인 페이지 제외).
+ */
+export async function pdDrafts(token: string): Promise<{ id: string; title: string; updateTime: string }[]> {
+  const list = await pdMyList(token);
+  return list
+    .filter((p) => p.category === POSTDLE_CATEGORY)
+    .filter((p) => p.published !== true)
+    // 최상위 메인 페이지('home', upperPageId 없음)는 제외 — 실제 글만.
+    .filter((p) => !!p.upperPageId && p.pageName !== 'home')
+    .map((p) => ({ id: p.id, title: p.pageName || '(제목 없음)', updateTime: p.updateTime }));
 }
 
 /** 특정 유저의 postdle 글 목록 (category=postdle 필터) */
