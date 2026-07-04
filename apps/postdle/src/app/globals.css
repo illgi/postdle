@@ -268,6 +268,32 @@ a { color: inherit; text-decoration: none; }
   .reco-marquee-track { animation: none; flex-wrap: nowrap; overflow-x: auto; }
 }
 
+/* ===== 오늘의 영감 — 좌우 2분할 히어로 ===== */
+.inspire-hero {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  margin: 20px 0 8px;
+}
+.inspire-panel {
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px; min-height: 200px;
+}
+.inspire-kicker { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; color: var(--primary-2); text-transform: uppercase; }
+.inspire-h { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px; margin: 0; color: var(--text); }
+.inspire-desc { font-size: 0.9rem; color: var(--text-sub); margin: 0; line-height: 1.6; }
+.inspire-image {
+  width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border); display: block;
+}
+.inspire-cap { font-size: 0.8rem; color: var(--muted); }
+.inspire-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.inspire-btn { padding: 10px 16px; font-size: 0.92rem; }
+.inspire-note { font-size: 0.78rem; color: var(--muted); }
+.inspire-text { justify-content: center; }
+@media (max-width: 640px) {
+  .inspire-hero { grid-template-columns: 1fr; }
+  .inspire-panel { min-height: 0; }
+}
+
 /* 전면 카드 그리드 */
 .feed-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

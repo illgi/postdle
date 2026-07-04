@@ -63,6 +63,7 @@ export default function ComposePage() {
   const [msg, setMsg] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [username, setUsername] = useState<string | null>(null); // 서브도메인/주소 미리보기용
+  const [loggedIn, setLoggedIn] = useState(false); // 이미지 업로드는 로그인 전용
 
   // 수정 중인 서버 글 id (없으면 새 글 생성)
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -97,13 +98,40 @@ export default function ComposePage() {
     }
   }, []);
 
-  // 로그인 유저명 조회 (주소 미리보기용)
+  // ?imageId= : 오늘의 이미지로 시작 (mode=info 면 정보 자동생성). content/topic 이 없을 때만.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const imageId = p.get('imageId');
+    if (!imageId || p.get('content') || p.get('topic')) return;
+    const mode = p.get('mode');
+    const hadTitle = !!p.get('title');
+    fetch(`/api/artwork/${encodeURIComponent(imageId)}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (!j.ok || !j.artwork) return;
+        if (mode === 'info' && j.infoHtml) {
+          setContent(j.infoHtml);
+          if (!hadTitle) setTitle(`${j.artwork.title} — 정보`);
+        } else {
+          setContent(
+            `<p><img src="${j.artwork.imageUrl}" alt="${j.artwork.title}"></p><p>이 이미지를 보고 떠오른 생각은…</p><p></p>`,
+          );
+          if (!hadTitle) setTitle(`${j.artwork.title}에 대하여`);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // 로그인 유저명 조회 (주소 미리보기용) + 로그인 여부(이미지 업로드 게이팅)
   useEffect(() => {
     let alive = true;
     fetch('/api/auth/me')
       .then((r) => r.json())
       .then((j) => {
-        if (alive && j.ok && j.user) setUsername(j.user.displayName || j.user.username || null);
+        if (!alive) return;
+        const ok = !!(j.ok && j.user);
+        setLoggedIn(ok);
+        if (ok) setUsername(j.user.displayName || j.user.username || null);
       })
       .catch(() => {});
     return () => {
@@ -322,6 +350,7 @@ export default function ComposePage() {
   }
 
   const onImageUpload = async (file: File): Promise<string> => {
+    if (!loggedIn) throw new Error('이미지 업로드는 로그인 후 가능해요');
     const fd = new FormData();
     fd.append('file', file);
     const res = await fetch('/api/upload', { method: 'POST', body: fd });
