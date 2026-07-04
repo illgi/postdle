@@ -18,7 +18,18 @@ export async function setSessionCookie(token: string) {
 }
 
 export async function clearSessionCookie() {
-  (await cookies()).delete(COOKIE);
+  const store = await cookies();
+  // 도메인(.postdle.com) 스코프로 설정된 쿠키는 같은 도메인으로 만료시켜야 실제로 삭제됨.
+  store.set(COOKIE, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    domain: cookieDomain(),
+    maxAge: 0,
+  });
+  // 도메인 없이 설정됐던 과거 쿠키까지 정리
+  store.delete(COOKIE);
 }
 
 /** 쿠키의 pagedle 토큰 (없으면 null) */

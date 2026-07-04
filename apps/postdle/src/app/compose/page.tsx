@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { PostEditor } from '@repo/post-editor';
 
 type Visibility = 'public' | 'private';
@@ -64,6 +65,7 @@ export default function ComposePage() {
   const [saving, setSaving] = useState(false);
   const [username, setUsername] = useState<string | null>(null); // 서브도메인/주소 미리보기용
   const [loggedIn, setLoggedIn] = useState(false); // 이미지 업로드는 로그인 전용
+  const [authReady, setAuthReady] = useState(false); // /me 확인 완료 여부(깜빡임 방지)
 
   // 수정 중인 서버 글 id (없으면 새 글 생성)
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -133,7 +135,8 @@ export default function ComposePage() {
         setLoggedIn(ok);
         if (ok) setUsername(j.user.displayName || j.user.username || null);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => alive && setAuthReady(true));
     return () => {
       alive = false;
     };
@@ -426,6 +429,14 @@ export default function ComposePage() {
         )}
       </div>
 
+      {/* 로그인 상태 안내 — 로그인해야 발행/임시저장/이미지 업로드 가능 */}
+      {authReady && !loggedIn && (
+        <div className="invite" style={{ marginTop: 10 }}>
+          로그인하지 않았어요. 지금은 미리 써볼 수 있고, 발행·임시저장·이미지 업로드는{' '}
+          <Link href="/login" style={{ fontWeight: 700, textDecoration: 'underline' }}>로그인</Link> 후 가능해요.
+        </div>
+      )}
+
       {/* 이어쓰기 칩 (localStorage 초안 복구) */}
       {restorable && !editingId && (
         <div className="restore-chip">
@@ -560,7 +571,15 @@ export default function ComposePage() {
         </button>
       </div>
 
-      {/* 내 임시저장 (서버측 미발행 글) */}
+      {/* 내 임시저장 (서버측 미발행 글) — 로그인 사용자만 */}
+      {authReady && !loggedIn ? (
+        <div className="drafts-section">
+          <div className="drafts-head"><h3>내 임시저장</h3></div>
+          <div className="muted" style={{ fontSize: '0.85rem' }}>
+            <Link href="/login" style={{ color: 'var(--primary-2)', textDecoration: 'underline' }}>로그인</Link>하면 임시저장한 글 목록을 볼 수 있어요.
+          </div>
+        </div>
+      ) : loggedIn ? (
       <div className="drafts-section">
         <div className="drafts-head">
           <h3>내 임시저장</h3>
@@ -585,6 +604,7 @@ export default function ComposePage() {
           </ul>
         )}
       </div>
+      ) : null}
     </div>
   );
 }
