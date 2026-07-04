@@ -1,7 +1,9 @@
 import { z } from 'zod';
+import { NextResponse } from 'next/server';
 import { getToken } from '@/lib/session';
 import { ok, handle, HttpError } from '@/lib/http';
 import { pdWritePost, pdMyPosts, pdUpdatePost, pdPublish, pdEnableFeedDisplay } from '@/lib/pagedle';
+import { checkContent } from '@/lib/moderation';
 
 // GET /api/posts?memberName=유저명 → 해당 유저의 postdle 글 목록
 export const GET = (r: Request) =>
@@ -32,6 +34,15 @@ export const POST = (r: Request) =>
     if (!p.success) throw new HttpError('제목과 내용을 입력해주세요');
     const { visibility, id, ...input } = p.data;
     const isPublic = visibility !== 'private';
+
+    // 자동 필터(모더레이션). 공개 글은 전체 규칙(길이/초성체/반복 포함),
+    // 비공개 초안은 개인정보·욕설만 검사하고 발행하지 않는다.
+    const moderation = checkContent(input.content, { requireLength: isPublic });
+    if (!moderation.ok) {
+      // compose 가 API 에러 메시지를 그대로 노출하므로 message·reason 둘 다 전달.
+      const reason = moderation.reason || '발행할 수 없는 내용이에요.';
+      return NextResponse.json({ ok: false, message: reason, reason }, { status: 400 });
+    }
 
     // 수정 모드: 기존 글 갱신(중복 생성 방지). 공개면 발행/피드 노출까지.
     if (id) {

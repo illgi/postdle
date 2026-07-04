@@ -82,13 +82,19 @@ export default function ComposePage() {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
 
-  // 랜딩의 문장/예시에서 넘어온 프리필 (?title=&content=)
+  // 랜딩의 문장/예시/화두에서 넘어온 프리필 (?title=&content=&topic=)
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     const t = p.get('title');
     const c = p.get('content');
+    const topic = p.get('topic');
     if (t) setTitle(t);
     if (c) setContent(c);
+    // ?topic= : content/title 이 없을 때만 화두로 프리필(content/title 이 우선).
+    if (topic) {
+      if (!c) setContent(`<p>\u2018${topic}\u2019\uc5d0 \ub300\ud55c \ub0b4 \uc0dd\uac01\uc740\u2026</p><p></p>`);
+      if (!t) setTitle(`\u2018${topic}\u2019\uc5d0 \ub300\ud55c \ub0b4 \uc0dd\uac01`);
+    }
   }, []);
 
   // 로그인 유저명 조회 (주소 미리보기용)
